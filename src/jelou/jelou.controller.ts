@@ -56,11 +56,11 @@ export class JelouController {
 
    @Post('terminar/chat')
   async terminarChat(@Query('id') id: string) {
-    console.log('temrinando chat con ' + id);
-   
-
+    console.log('terminando chat con ' + id);
+    await this.jelouService.closeConversation(id);
     return {
-      status: 'mensaje recibido y registrado en Bitrix',
+      status: 'mensaje recibido y registrado en jelou',
     };
   } 
+
 }

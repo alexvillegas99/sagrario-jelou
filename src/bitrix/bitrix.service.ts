@@ -1,23 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { JelouService } from 'src/jelou/jelou.service';
 
 @Injectable()
 export class BitrixService {
+
+
+  constructor(
+    //me da que es una dependencia circular agregar forwordRef
+     @Inject(forwardRef(() => JelouService))
+    private readonly jelouService: JelouService,
+  ){
+
+  }
+  private readonly apiUrl = 'https://bitrix.elsagrario.fin.ec/rest/138';
+  //concatena todo de una vez
+  
   private readonly leadAdd =
-    'https://bitrix.elsagrario.fin.ec/rest/138/yk2aztg75p2nn0ia/crm.lead.add.json';
+  `${this.apiUrl}/yk2aztg75p2nn0ia/crm.lead.add.json`;
   private readonly activityAdd =
-    'https://bitrix.elsagrario.fin.ec/rest/138/cfa8x0ca0m4euzxg/crm.activity.add.json';
+    `${this.apiUrl}/cfa8x0ca0m4euzxg/crm.activity.add.json`;
   private readonly dealUpdate =
-    'https://bitrix.elsagrario.fin.ec/rest/138/18i0vg3zyg5kxi9v/crm.deal.update.json';
+    `${this.apiUrl}/18i0vg3zyg5kxi9v/crm.deal.update.json`;
   private readonly contactList =
-    'https://bitrix.elsagrario.fin.ec/rest/138/fvpaq81k0yvk9eas/crm.contact.list.json';
+    `${this.apiUrl}/fvpaq81k0yvk9eas/crm.contact.list.json`;
   private readonly contactAdd =
-    'https://bitrix.elsagrario.fin.ec/rest/138/tnnabkmaf49qy5w8/crm.contact.add.json';
+    `${this.apiUrl}/tnnabkmaf49qy5w8/crm.contact.add.json`;
   private readonly dealAdd =
-    'https://bitrix.elsagrario.fin.ec/rest/138/wswyvle82l8ajlut/crm.deal.add.json';
+    `${this.apiUrl}/wswyvle82l8ajlut/crm.deal.add.json`;
   private readonly dealList =
-    'https://bitrix.elsagrario.fin.ec/rest/138/uu3tnphw928s8cxn/crm.deal.list.json';
-  private campoTexto = 'UF_CRM_1753983007521';
+    `${this.apiUrl}/uu3tnphw928s8cxn/crm.deal.list.json`;
 
   async buscarLeadPorTelefono(telefono: string) {
     const { data } = await axios.post(this.contactList, {
@@ -141,16 +153,15 @@ export class BitrixService {
       return;
     }
 
-    const telefono = await this.obtenerTelefonoPorContactoId(contactoId);
+    let telefono = await this.obtenerTelefonoPorContactoId(contactoId);
+    //eliminar el +
+    telefono = telefono.replace('+', '');
     console.log(`Mensaje: ${mensaje}`);
     console.log(`Teléfono: ${telefono}`);
 
     // Enviar a Jelou (aquí reemplaza por tu endpoint real)
-    await axios.post('https://tu-servidor.com/api/jelou', {
-      telefono,
-      mensaje,
-    });
-
+  const sms = await  this.jelouService.sendText(telefono, mensaje);
+    console.log(`Respuesta de Jelou: ${JSON.stringify(sms)}`);
     // Registrar actividad
     await axios.post(this.activityAdd, {
       fields: {
@@ -163,6 +174,9 @@ export class BitrixService {
         OWNER_TYPE_ID: 2,
       },
     });
+
+   
+
   }
 
   async buscarNegociacionPorID(id: string) {
