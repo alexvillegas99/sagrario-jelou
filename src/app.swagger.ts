@@ -7,7 +7,7 @@ export const initSwagger = (
   description?: string,
 ) => {
   const swaggerConfig = new DocumentBuilder()
-    .setTitle(title || 'Api Backend Cuponera')
+    .setTitle(title || 'Api Backend JELOU - BITRIX')
     .setDescription(description || 'Documentación de la API')
     .setVersion('1.0')
     .addBearerAuth()
